@@ -1,42 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Live Table Map</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        .table-card { transition: transform 0.2s; cursor: pointer; text-decoration: none; }
-        .table-card:hover { transform: scale(1.05); }
-        .status-AVAILABLE { background-color: #d4edda; border: 2px solid #28a745; color: #155724; }
-        .status-PENDING { background-color: #fff3cd; border: 2px solid #ffc107; color: #856404; }
-        .status-OCCUPIED { background-color: #f8d7da; border: 2px solid #dc3545; color: #721c24; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: linear-gradient(135deg, #212529 0%, #343a40 100%); }
+        
+        /* Table Card Styling consistent with Dashboard */
+        .table-card { 
+            border: none; 
+            border-radius: 16px; 
+            transition: all 0.3s ease; 
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .table-card:hover { 
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+        }
+
+        /* Status Colors using your system's palette */
+        .status-AVAILABLE { background-color: #d1e7dd; border-top: 5px solid #198754; color: #0f5132; }
+        .status-PENDING { background-color: #fff3cd; border-top: 5px solid #ffc107; color: #664d03; }
+        .status-OCCUPIED { background-color: #f8d7da; border-top: 5px solid #dc3545; color: #842029; }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     </style>
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Live Table Map</h2>
-        <a th:href="@{/welcome}" class="btn btn-outline-dark">Back to Dashboard</a>
+<body>
+
+<nav class="navbar navbar-dark mb-4 shadow-sm">
+    <div class="container">
+        <a th:href="@{/welcome}" class="navbar-brand fw-bold">
+            <i class="bi bi-chevron-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Live Table Map</h2>
+            <p class="text-muted mb-0">Real-time occupancy and order status</p>
+        </div>
+        
+        <div class="bg-white p-3 rounded-3 shadow-sm d-flex gap-3 small fw-bold">
+            <span><span class="legend-dot bg-success"></span> Available</span>
+            <span><span class="legend-dot bg-warning"></span> Pending</span>
+            <span><span class="legend-dot bg-danger"></span> Occupied</span>
+        </div>
     </div>
 
-    <div class="mb-4 d-flex gap-3">
-        <span><i class="bi bi-square-fill text-success"></i> Available</span>
-        <span><i class="bi bi-square-fill text-warning"></i> Pending Order</span>
-        <span><i class="bi bi-square-fill text-danger"></i> Occupied</span>
-    </div>
-
-    <div class="row row-cols-2 row-cols-md-5 g-4">
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4">
         <div class="col" th:each="entry : ${tableStatusMap}">
             <a th:href="@{/table/bill/search(tableNumber=${entry.key})}" 
-               th:class="'card h-100 shadow-sm table-card status-' + ${entry.value}">
+               th:class="'card table-card shadow-sm status-' + ${entry.value}">
                 <div class="card-body text-center py-4">
-                    <i class="bi bi-layout-text-window-reverse display-4"></i>
-                    <h4 class="card-title mt-2 fw-bold" th:text="'Table ' + ${entry.key}">Table 1</h4>
-                    <small class="text-uppercase fw-bold" th:text="${entry.value}">Status</small>
+                    <div class="icon-box">
+                        <i class="bi bi- hospitality fs-2" 
+                           th:classappend="${entry.value == 'AVAILABLE' ? 'bi-unlock-fill' : 'bi-person-fill'}"></i>
+                    </div>
+                    <h4 class="card-title fw-bold mb-1" th:text="'Table ' + ${entry.key}">Table 1</h4>
+                    <span class="badge rounded-pill text-uppercase px-3" 
+                          th:classappend="${entry.value == 'AVAILABLE' ? 'bg-success' : (entry.value == 'PENDING' ? 'bg-warning text-dark' : 'bg-danger')}"
+                          th:text="${entry.value}">Status</span>
                 </div>
             </a>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
