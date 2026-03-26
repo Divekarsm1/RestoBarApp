@@ -71,7 +71,9 @@
 						    <div class="alert alert-info py-2 mb-2 border-0">
 						        <i class="bi bi-fire"></i> Cooking: 
 						        <span class="fw-bold prep-timer" 
-						              th:data-start-time="${order.acceptedAt}">0m 0s</span>
+								      th:data-start-time="${#temporals.format(order.acceptedAt, 'yyyy-MM-dd''T''HH:mm:ss')}">
+								    0m 0s
+								</span>
 						    </div>
 						    
 						    <form th:action="@{/order/complete}" method="post">
@@ -102,26 +104,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function updateTimers() {
-        document.querySelectorAll('.prep-timer').forEach(timer => {
-            const startTimeStr = timer.getAttribute('data-start-time');
-            if (!startTimeStr) return;
-
-            const startTime = new Date(startTimeStr).getTime();
-            const now = new Date().getTime();
-            const diff = now - startTime;
-
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            timer.innerHTML = minutes + "m " + seconds + "s";
-            
-            // Visual Warning: Turn red if preparation takes more than 15 minutes
-            if (minutes >= 15) {
-                timer.parentElement.classList.replace('alert-info', 'alert-danger');
-            }
-        });
-    }
+		function updateTimers() {
+		    document.querySelectorAll('.prep-timer').forEach(timer => {
+		        const startTimeStr = timer.getAttribute('data-start-time');
+		        if (!startTimeStr) return;
+		
+		        // Ensure we parse the ISO string correctly
+		        const startTime = new Date(startTimeStr).getTime();
+		        const now = new Date().getTime();
+		        
+		        // Calculate the difference in milliseconds
+		        const diff = now - startTime;
+		
+		        if (isNaN(diff) || diff < 0) {
+		            timer.innerHTML = "0m 0s";
+		            return;
+		        }
+		
+		        const minutes = Math.floor(diff / (1000 * 60));
+		        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+		
+		        timer.innerHTML = minutes + "m " + seconds + "s";
+		        
+		        // Visual Warning: Turn red if preparation takes more than 15 minutes
+		        if (minutes >= 15) {
+		            const alertBox = timer.closest('.alert');
+		            if (alertBox) alertBox.classList.replace('alert-info', 'alert-danger');
+		        }
+		    });
+		}
 
     // Update every second
     setInterval(updateTimers, 1000);
