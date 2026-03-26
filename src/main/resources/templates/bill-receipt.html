@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt - Table [[${order.tableNumber}]]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Styles for the screen */
+        body { background-color: #f4f4f4; padding-top: 50px; }
+        .receipt-paper {
+            background: white;
+            width: 80mm; /* Standard thermal printer width */
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .line { border-top: 1px dashed #000; margin: 10px 0; }
+        
+        /* Styles for the printer */
+        @media print {
+            body { background: none; padding: 0; }
+            .no-print { display: none; }
+            .receipt-paper { box-shadow: none; width: 100%; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container text-center no-print mb-4">
+    <button onclick="window.print()" class="btn btn-primary btn-lg">🖨️ Click to Print Bill</button>
+    <a href="/active-orders" class="btn btn-secondary btn-lg">Back to Orders</a>
+</div>
+
+<div class="receipt-paper">
+    <div class="text-center">
+        <h4 class="fw-bold">RESTBAR PLAZA</h4>
+        <p class="small">123 Food Street, City<br>Tel: +91 9876543210</p>
+    </div>
+    
+    <div class="line"></div>
+    
+    <div class="d-flex justify-content-between small">
+        <span>Table: <strong th:text="${order.tableNumber}"></strong></span>
+        <span>ID: #[[${order.id}]]</span>
+    </div>
+    <div class="small" th:text="${#temporals.format(order.orderTime, 'dd-MM-yyyy HH:mm')}"></div>
+    
+    <div class="line"></div>
+    
+    <table class="table table-sm table-borderless small">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Amt</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${order.items}">
+                <td th:text="${item.name}"></td>
+                <td class="text-center" th:text="${item.quantity}"></td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(item.price * item.quantity, 1, 2)}"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="line"></div>
+    
+    <div class="d-flex justify-content-between fw-bold">
+        <span>TOTAL BILL:</span>
+        <span th:text="'₹' + ${#numbers.formatDecimal(total, 1, 2)}"></span>
+    </div>
+    
+    <div class="line"></div>
+    
+    <div class="text-center mt-4 small">
+        <p>Thank You! Visit Again.</p>
+        <p>*** GST INCLUDED ***</p>
+    </div>
+</div>
+
+</body>
+</html>
