@@ -150,7 +150,38 @@
                 </div>
             </div>
         </div>
-
+		<div class="col-md-6 col-lg-4">
+            <div class="card feature-card shadow-sm p-3 border-top border-danger border-4">
+                <div class="card-body">
+                    <div>
+                        <div class="icon-box bg-danger-subtle text-danger">
+                            <i class="bi bi-grid-3x3-gap fs-1"></i>
+                        </div>
+                        <h4 class="card-title fw-bold text-center">Live Table Map</h4>
+                        <p class="text-muted text-center">Monitor real-time table status and availability at a glance.</p>
+                    </div>
+                    <a th:href="@{/table-map}" class="btn btn-danger btn-lg w-100 fw-bold rounded-pill mt-3 text-white">
+                        <i class="bi bi-geo-alt me-2"></i>View Map
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card shadow-sm p-3 border-top border-secondary border-4">
+                <div class="card-body">
+                    <div>
+                        <div class="icon-box bg-secondary-subtle text-secondary">
+                            <i class="bi bi-journal-text fs-1"></i>
+                        </div>
+                        <h4 class="card-title fw-bold text-center">Menu Management</h4>
+                        <p class="text-muted text-center">Update prices, add new dishes, or toggle item availability.</p>
+                    </div>
+                    <a th:href="@{/admin/menu}" class="btn btn-secondary btn-lg w-100 fw-bold rounded-pill mt-3 text-white">
+                        <i class="bi bi-gear-fill me-2"></i>Manage Menu
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

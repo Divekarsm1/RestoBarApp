@@ -18,9 +18,44 @@
 </nav>
 
 <div class="container">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form th:action="@{/bill/history}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Search Bill No</label>
+                    <input type="text" name="billNumber" class="form-control" placeholder="e.g. BN-001" th:value="${param.billNumber}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Table</label>
+                    <select name="tableNumber" class="form-select">
+                        <option value="">All Tables</option>
+                        <option th:each="i : ${#numbers.sequence(1, 10)}" th:value="${i}" th:text="'Table ' + ${i}" th:selected="${param.tableNumber == i.toString()}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">From Date</label>
+                    <input type="date" name="startDate" class="form-control" th:value="${param.startDate}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">To Date</label>
+                    <input type="date" name="endDate" class="form-control" th:value="${param.endDate}">
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h3 class="fw-bold mb-0">Billing History</h3>
+            <span class="badge bg-primary" th:text="${bills.size()} + ' Records Found'">0 Records</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -53,7 +88,8 @@
                         <tr th:if="${#lists.isEmpty(bills)}">
                             <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="bi bi-folder2-open display-4"></i>
-                                <p class="mt-2">No billing records found.</p>
+                                <p class="mt-2">No billing records found matching the filters.</p>
+                                <a th:href="@{/bill/history}" class="btn btn-link">Clear all filters</a>
                             </td>
                         </tr>
                     </tbody>

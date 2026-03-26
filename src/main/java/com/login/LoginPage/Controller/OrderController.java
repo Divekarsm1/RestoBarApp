@@ -65,7 +65,9 @@ public class OrderController {
     
     @GetMapping("/order")
     public String showOrderPage(Model model) {
-        List<MenuItem> allMenuItems = menuItemRepository.findAll();
+    	List<MenuItem> allMenuItems = menuItemRepository.findAll().stream()
+                .filter(MenuItem::isAvailable) 
+                .collect(Collectors.toList());
         
         RestaurantOrder order = new RestaurantOrder();
         List<OrderItem> formItems = allMenuItems.stream()
@@ -225,8 +227,30 @@ public class OrderController {
     }
     
     @GetMapping("/bill/history")
-    public String viewBillHistory(Model model) {
-        model.addAttribute("bills", billRepository.findAllByOrderByCheckoutTimeDesc());
+    public String viewBillHistory(
+            @RequestParam(required = false) String billNumber,
+            @RequestParam(required = false) Integer tableNumber,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
+            Model model) {
+
+        List<Bill> allBills = billRepository.findAllByOrderByCheckoutTimeDesc();
+
+        // Apply filters in memory
+        List<Bill> filteredBills = allBills.stream()
+                .filter(bill -> (billNumber == null || billNumber.isEmpty() || bill.getBillNumber().contains(billNumber)))
+                .filter(bill -> (tableNumber == null || bill.getTableNumber().equals(tableNumber)))
+                .filter(bill -> {
+                    if (startDate == null) return true;
+                    return !bill.getCheckoutTime().toLocalDate().isBefore(startDate);
+                })
+                .filter(bill -> {
+                    if (endDate == null) return true;
+                    return !bill.getCheckoutTime().toLocalDate().isAfter(endDate);
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("bills", filteredBills);
         return "bill-history";
     }
 
@@ -263,7 +287,34 @@ public class OrderController {
     }
 
    
+    @GetMapping("/table-map")
+    public String showTableMap(Model model) {
+        // Fetch all orders that are not yet PAID
+        List<RestaurantOrder> activeOrders = orderRepository.findAll().stream()
+                .filter(o -> !"PAID".equals(o.getStatus()))
+                .collect(Collectors.toList());
 
+        // Map to store Status for each table (1 to 10)
+        java.util.Map<Integer, String> tableStatusMap = new java.util.HashMap<>();
+        
+        for (int i = 1; i <= 10; i++) {
+            final int tableNum = i;
+            List<RestaurantOrder> ordersForTable = activeOrders.stream()
+                    .filter(o -> o.getTableNumber() == tableNum)
+                    .collect(Collectors.toList());
+
+            if (ordersForTable.isEmpty()) {
+                tableStatusMap.put(i, "AVAILABLE"); // Green
+            } else if (ordersForTable.stream().anyMatch(o -> "PENDING".equals(o.getStatus()))) {
+                tableStatusMap.put(i, "PENDING");   // Yellow
+            } else {
+                tableStatusMap.put(i, "OCCUPIED");  // Red
+            }
+        }
+
+        model.addAttribute("tableStatusMap", tableStatusMap);
+        return "table-map";
+    }
     
     
 }
